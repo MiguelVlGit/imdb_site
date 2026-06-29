@@ -44,7 +44,54 @@ terminal e cole no navegador.
 3. O resultado aparece destacado (Positivo ou Negativo), junto com o nível
    de confiança do modelo.
 
-## Observações
+## Deploy no Render
+
+Este projeto já inclui os arquivos necessários para rodar no Render
+(`render.yaml` e `.streamlit/config.toml`).
+
+### Passo a passo
+
+1. **Coloque os arquivos do modelo na pasta `modelos/`** (substituindo o
+   `.gitkeep`): `imdb_modelo.joblib` e `imdb_artefatos.joblib`.
+
+2. **Suba este projeto para um repositório no GitHub** (o Render faz deploy
+   a partir de um repositório Git):
+   ```bash
+   git init
+   git add .
+   git commit -m "Site de análise de sentimento IMDB"
+   git branch -M main
+   git remote add origin <URL_DO_SEU_REPOSITORIO>
+   git push -u origin main
+   ```
+   > Os arquivos `.joblib` deste projeto somam poucas dezenas de MB, dentro
+   > do limite padrão do GitHub (100 MB por arquivo). Se algum arquivo for
+   > maior que isso, use [Git LFS](https://git-lfs.com/).
+
+3. **No painel do Render** (https://dashboard.render.com):
+   - Clique em **New** → **Web Service**.
+   - Conecte o repositório que você acabou de criar.
+   - O Render deve detectar o `render.yaml` automaticamente e preencher:
+     - **Build Command:** `pip install -r requirements.txt`
+     - **Start Command:** `streamlit run app.py --server.port $PORT --server.address 0.0.0.0`
+   - Caso não detecte automaticamente, preencha esses dois campos manualmente.
+   - Escolha o plano **Free** (suficiente para este protótipo).
+   - Clique em **Create Web Service**.
+
+4. Aguarde o build (alguns minutos). Quando terminar, o Render fornece uma
+   URL pública (algo como `https://imdb-sentiment-app.onrender.com`) — é o
+   link do seu site, acessível de qualquer navegador.
+
+### Observações sobre o plano gratuito do Render
+
+- O serviço "dorme" depois de um período de inatividade; a primeira
+  requisição depois disso demora mais (o Render precisa religar o
+  container).
+- Não é necessário configurar nada além do que já está nos arquivos deste
+  projeto — `--server.port $PORT` faz o Streamlit escutar na porta que o
+  Render define automaticamente.
+
+## Observações gerais
 
 - O modelo só entende texto em **inglês**, pois foi treinado no dataset
   IMDB Dataset of 50K Movie Reviews (resenhas originalmente em inglês).
@@ -54,3 +101,4 @@ terminal e cole no navegador.
   `imdb_artefatos.joblib`.
 - Esta aplicação é independente de qualquer outro projeto — só depende dos
   dois arquivos `.joblib` citados acima.
+
